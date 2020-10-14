@@ -107,7 +107,7 @@ launch state = do
       putStrLn $ look state
       launch state
     "walk" -> do
-      case parseDir args >>= \dir -> walk state dir of
+      case parseDir args >>= (walk state) of
         Left err -> do
           putStrLn err
           launch state
@@ -118,7 +118,7 @@ launch state = do
       putStrLn $ inventory state
       launch state
     "pick" -> do
-      case parseItem args >>= \item -> pick state item of
+      case parseItem args >>= (pick state) of
         Left err -> do
           putStrLn err
           launch state
