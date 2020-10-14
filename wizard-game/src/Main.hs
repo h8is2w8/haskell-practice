@@ -3,6 +3,7 @@ module Main where
 import Data.List (intercalate, find)
 import Data.Maybe (fromJust)
 import Text.Read (readMaybe)
+import Control.Monad ((>=>))
 
 
 type Error = String
@@ -94,7 +95,7 @@ parseDir :: [String] -> Either Error String
 parseDir [] = Left  "you should specify a direction."
 parseDir args = Right (head args)
 
-# TODO: capitalize first letters in a sentece
+-- TODO: capitalize first letters in a sentece
 gamePrint = putStrLn
 
 launch :: GameState -> IO ()
@@ -110,7 +111,7 @@ launch state = do
       gamePrint $ look state
       launch state
     "walk" -> do
-      case parseDir args >>= (walk state) of
+      case parseDir >=> (walk state) $ args of
         Left err -> do
           gamePrint err
           launch state
@@ -121,7 +122,7 @@ launch state = do
       gamePrint $ inventory state
       launch state
     "pick" -> do
-      case parseItem args >>= (pick state) of
+      case parseItem >=> (pick state) $ args of
         Left err -> do
           gamePrint err
           launch state
