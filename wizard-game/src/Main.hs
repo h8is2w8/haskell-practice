@@ -94,6 +94,9 @@ parseDir :: [String] -> Either Error String
 parseDir [] = Left  "you should specify a direction."
 parseDir args = Right (head args)
 
+# TODO: capitalize first letters in a sentece
+gamePrint = putStrLn
+
 launch :: GameState -> IO ()
 launch state = do
   input <- getLine
@@ -102,31 +105,31 @@ launch state = do
 
   case cmd of
     "quit" -> do
-      putStrLn "Bye!"
+      gamePrint "bye!"
     "look" -> do
-      putStrLn $ look state
+      gamePrint $ look state
       launch state
     "walk" -> do
       case parseDir args >>= (walk state) of
         Left err -> do
-          putStrLn err
+          gamePrint err
           launch state
         Right newState -> do
-          putStrLn $ look newState
+          gamePrint $ look newState
           launch newState
     "inventory" -> do
-      putStrLn $ inventory state
+      gamePrint $ inventory state
       launch state
     "pick" -> do
       case parseItem args >>= (pick state) of
         Left err -> do
-          putStrLn err
+          gamePrint err
           launch state
         Right newState -> do
-          putStrLn "you obtained a new item. check your inventory."
+          gamePrint "you obtained a new item. check your inventory."
           launch newState
     _ -> do
-      putStrLn "i cannot do this."
+      gamePrint "i cannot do this."
       launch state
 
 main :: IO ()
