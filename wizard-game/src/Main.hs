@@ -98,11 +98,16 @@ parseDir args = Right (head args)
 -- TODO: capitalize first letters in a sentece
 gamePrint = putStrLn
 
+gameRead :: IO [String]
+gameRead = do
+  input <- getLine
+  return . words $ input
+
 launch :: GameState -> IO ()
 launch state = do
-  input <- getLine
+  input <- gameRead
 
-  let (cmd:args) = words $ input
+  let (cmd:args) = if input == [] then [""] else input
 
   case cmd of
     "quit" -> do
