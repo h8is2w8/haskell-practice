@@ -97,8 +97,8 @@ parseDir args = Right (head args)
 launch :: GameState -> IO ()
 launch state = do
   input <- getLine
-  let cmd = head . words $ input
-  let args = tail . words $ input
+
+  let (cmd:args) = words $ input
 
   case cmd of
     "quit" -> do
