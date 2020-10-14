@@ -2,6 +2,8 @@ module Main where
 
 import Data.List (intercalate, find)
 import Data.Maybe (fromJust)
+import Text.Read (readMaybe)
+
 
 type Error = String
 type PlayerLocation = Location
@@ -65,22 +67,32 @@ walk (GameState loc inventory itemLoc) nextDir =
     Just (loc, _, _) -> Right $ GameState loc inventory itemLoc
 
 inventory :: GameState -> String
-inventory (GameState _ _ storage) =
+inventory (GameState _ storage _) =
   if length(storage) > 0
   then
     "you have: " ++ (intercalate ", " $ map show storage)
   else
     "you have nothing in your pockets!"
 
-pick :: GameState -> String -> Either Error GameState
-pick (GameState loc inventory itemLoc) str =
-  let candidate = (read str) :: Item
-      itemsAtLoc = itemsAt loc itemLoc
-  in case find (\i -> i == candidate) itemsAtLoc of
+pick :: GameState -> Item -> Either Error GameState
+pick (GameState loc inventory itemLoc) itemCandidate =
+  let itemsAtLoc = itemsAt loc itemLoc
+  in case find (\i -> i == itemCandidate) itemsAtLoc of
     Nothing -> Left "there is nothing to pick up."
     Just item ->
       let newItemLoc = filter (\(i, _) -> i /= item) itemLoc
       in Right $ GameState loc (item : inventory) newItemLoc
+
+parseItem :: [String] -> Either Error Item
+parseItem [] = Left "you should specify what you want to pick up."
+parseItem args =
+  case (readMaybe (head args)) :: Maybe Item of
+    Nothing -> do Left "i cannot pick up that."
+    Just item -> do Right item
+
+parseDir :: [String] -> Either Error String
+parseDir [] = Left  "you should specify a direction."
+parseDir args = Right (head args)
 
 launch :: GameState -> IO ()
 launch state = do
@@ -95,7 +107,7 @@ launch state = do
       putStrLn $ look state
       launch state
     "walk" -> do
-      case walk state (head args) of
+      case parseDir args >>= \dir -> walk state dir of
         Left err -> do
           putStrLn err
           launch state
@@ -106,7 +118,7 @@ launch state = do
       putStrLn $ inventory state
       launch state
     "pick" -> do
-      case pick state (head args) of
+      case parseItem args >>= \item -> pick state item of
         Left err -> do
           putStrLn err
           launch state
@@ -129,5 +141,3 @@ main = do
             (Chain, Garden),
             (Frog, Garden)
           ])
-
-
